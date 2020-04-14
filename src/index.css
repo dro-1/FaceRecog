@@ -1,10 +1,20 @@
+html{
+ height: 100%;
+}
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Open Sans','Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+   background: linear-gradient(to right bottom, #df4072, #fb5e4c, #fc8d18, #e1bd00, #a8eb12);
+   background-size: cover;
+   font-size: 10px;
+}
+
+button{
+  cursor: pointer;
 }
 
 code {

@@ -1,0 +1,20 @@
+.rank-info{
+    font-family: 'Comic Neue', sans-serif;
+    font-size: 1.4rem;
+    color: white;
+    position: relative;
+    width: 100%;
+    left: -3.5rem;
+    top: 3rem;
+
+}
+ 
+.rank-info:last-child) p {
+    margin: 0;
+}
+
+@media screen and (max-width:700px){
+    .rank-info{
+        position: static;
+    }
+}

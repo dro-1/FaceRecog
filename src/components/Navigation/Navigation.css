@@ -1,0 +1,16 @@
+nav{
+    display:flex;
+    justify-content: flex-end;
+}
+nav > p{
+    text-align: center;
+    width: 10rem;
+    padding: 1rem;
+    font-size: 1.5rem;
+}
+@media screen and (max-width: 700px){
+    nav>p{
+        padding: .5rem;
+        font-size: 1.2rem;
+    }
+}
