@@ -1,0 +1,12 @@
+.image-container{
+    width: 50%;
+    margin: 0 auto;
+    position: relative;
+}
+.image-container{
+    width:50%;
+}
+.bounding-box{
+    position: absolute;
+    box-shadow: 0 0 0 3px #149df2 ;
+}

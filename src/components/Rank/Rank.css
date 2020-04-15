@@ -9,8 +9,9 @@
 
 }
  
-.rank-info:last-child) p {
+.rank-info p:last-child{
     margin: 0;
+    font-size: 3rem;
 }
 
 @media screen and (max-width:700px){

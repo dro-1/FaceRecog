@@ -3,9 +3,15 @@ import Navigation from './components/Navigation/Navigation';
 import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkform';
 import Rank from './components/Rank/Rank';
-import Particles from 'react-particles-js'
+import FaceRecognition from './components/FaceRecognition/FaceRecognition';
+import Clarifai from 'clarifai';
+import Particles from 'react-particles-js';
 import './App.css';
-import 'tachyons'
+import 'tachyons';
+
+const app = new Clarifai.App({
+  apiKey: 'dfda414ff75c4e2cabe409b1021ba3a2'
+ });
 
 const particleParams = {
   "particles": {
@@ -121,16 +127,31 @@ class App extends Component {
   constructor(){
     super();
     this.state = {
-      input:''
+      input:'',
+      imageURL:'',
+      box:{}
     }
   }
 
   onInputChange = event =>{
-    console.log(event.target.value);
+    this.setState({input:event.target.value});
+  }
+  CalculateFaceLocation = data =>{
+    let image = document.querySelector('#image');
+   let width = Number(image.width);
+   let height = Number(image.height);
+   return `${data[0].region_info.bounding_box.top_row * height-3}px ${width - data[0].region_info.bounding_box.right_col * width-3}px ${height - data[0].region_info.bounding_box.bottom_row * height-3}px ${data[0].region_info.bounding_box.left_col * width-3}px`
+  }
+
+  DisplayFaceLocation = box =>{
+    this.setState({box})
   }
 
   onButtonSubmit = event =>{
-    console.log('click')
+    this.setState({imageURL:this.state.input});
+    app.models.predict("a403429f2ddf4b49b307e318f00e528b",this.state.input)
+    .then( response=> { this.DisplayFaceLocation(this.CalculateFaceLocation(response.rawData.outputs[0].data.regions))
+    }).catch(err=>{console.log(err);})
     return false;
   }
   
@@ -142,9 +163,7 @@ class App extends Component {
             <Logo />
             <Rank />
             <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} />
-          
-            {/* 
-            <FaceRecognition/> */}
+            <FaceRecognition box={this.state.box} imageURL={this.state.imageURL}/> 
           </div>
        );
 }
