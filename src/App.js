@@ -4,6 +4,8 @@ import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkform';
 import Rank from './components/Rank/Rank';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
+import SignIn from './components/SignIn/SignIn';
+import Register from './components/Register/Register';
 import Clarifai from 'clarifai';
 import Particles from 'react-particles-js';
 import './App.css';
@@ -129,13 +131,19 @@ class App extends Component {
     this.state = {
       input:'',
       imageURL:'',
-      box:{}
+      box:{},
+      route:'register'
     }
   }
 
   onInputChange = event =>{
     this.setState({input:event.target.value});
   }
+
+  onRouteChange = route =>{
+    this.setState({route})
+  }
+
   CalculateFaceLocation = data =>{
     let image = document.querySelector('#image');
    let width = Number(image.width);
@@ -159,11 +167,26 @@ class App extends Component {
       return (
           <div className="App">
             <Particles className='particles' params={particleParams} />
-            <Navigation />
-            <Logo />
-            <Rank />
-            <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} />
-            <FaceRecognition box={this.state.box} imageURL={this.state.imageURL}/> 
+            <Navigation onRouteChange={this.onRouteChange} route={this.state.route}/>
+
+            { 
+              this.state.route === 'signin' 
+           
+            ? <SignIn onRouteChange={this.onRouteChange}/>
+            
+            : (
+               this.state.route === 'register'
+                
+              ? <Register onRouteChange={this.onRouteChange}/>
+                
+              : <div>
+                    <Logo />
+                    <Rank />
+                    <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} />
+                    <FaceRecognition box={this.state.box} imageURL={this.state.imageURL}/> 
+                </div>
+            )
+            }
           </div>
        );
 }
