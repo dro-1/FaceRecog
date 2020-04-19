@@ -1,14 +1,17 @@
 import React from 'react';
 import './FaceRecognition.css'
 
-const FaceRecognition = ({ imageURL,box }) =>{
+
+
+
+const FaceRecognition = ({ imageURL }) =>{
+    
     return(
            <div className='image-container'>
-               <img id='image' alt='Detected' src={imageURL}>
+               <img id='image' alt='' src={imageURL}>
                </img>
-               <div style={{inset:box}} className='bounding-box'></div>
-           </div>
+            </div>
     )
 }
 
-export default FaceRecognition
+export default FaceRecognition;

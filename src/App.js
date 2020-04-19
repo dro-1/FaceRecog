@@ -6,14 +6,10 @@ import Rank from './components/Rank/Rank';
 import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 import SignIn from './components/SignIn/SignIn';
 import Register from './components/Register/Register';
-import Clarifai from 'clarifai';
 import Particles from 'react-particles-js';
 import './App.css';
 import 'tachyons';
 
-const app = new Clarifai.App({
-  apiKey: 'dfda414ff75c4e2cabe409b1021ba3a2'
- });
 
 const particleParams = {
   "particles": {
@@ -125,15 +121,39 @@ const particleParams = {
   },
   "retina_detect": true
 }
+
+
+const initialState = {
+      input:'',
+      imageURL:'',
+      boxes:[],
+      route:'signin',
+      user: {
+        id:'',
+        name:'',
+        email:'',
+        entries:'',
+        joined: ''
+      },
+      checked: false
+    }
+  
+
 class App extends Component {
   constructor(){
     super();
-    this.state = {
-      input:'',
-      imageURL:'',
-      box:{},
-      route:'register'
-    }
+    this.state = initialState;
+  }
+
+  loadUser = data =>{
+    this.setState(initialState);
+    this.setState({user:{
+        id:data.id,
+        name:data.name,
+        email:data.email,
+        entries:data.entries,
+        joined: data.joined
+    }})
   }
 
   onInputChange = event =>{
@@ -148,19 +168,80 @@ class App extends Component {
     let image = document.querySelector('#image');
    let width = Number(image.width);
    let height = Number(image.height);
-   return `${data[0].region_info.bounding_box.top_row * height-3}px ${width - data[0].region_info.bounding_box.right_col * width-3}px ${height - data[0].region_info.bounding_box.bottom_row * height-3}px ${data[0].region_info.bounding_box.left_col * width-3}px`
+   return [`${data.region_info.bounding_box.top_row * height-3}px`,`${width - data.region_info.bounding_box.right_col * width-3}px`,`${height - data.region_info.bounding_box.bottom_row * height-3}px`,`${data.region_info.bounding_box.left_col * width-3}px`]
   }
 
   DisplayFaceLocation = box =>{
-    this.setState({box})
+    this.setState({
+      boxes : this.state.boxes.concat([box])
+    });
   }
-
+  
   onButtonSubmit = event =>{
-    this.setState({imageURL:this.state.input});
-    app.models.predict("a403429f2ddf4b49b307e318f00e528b",this.state.input)
-    .then( response=> { this.DisplayFaceLocation(this.CalculateFaceLocation(response.rawData.outputs[0].data.regions))
-    }).catch(err=>{console.log(err);})
-    return false;
+    event.preventDefault();
+    const { input } = this.state;
+    if(this.state.checked){
+      this.setState({boxes:[]})
+    }
+
+    if(this.url !== input ){
+    this.setState({imageURL:input});
+
+   fetch('https://agile-atoll-33348.herokuapp.com/imageDetection',{
+     method:'put',
+     headers: {'Content-Type':'application/json'},
+     body : JSON.stringify({
+       imageURL : input
+     })
+   })
+   .then(response => response.json())
+    .then( response=> { 
+      response.rawData.outputs[0].data.regions.forEach( region => {
+        this.DisplayFaceLocation(this.CalculateFaceLocation(region))
+      })
+    })
+    .then( res => {
+      let count = 0
+      let bounds = document.getElementsByClassName('bounding-box');
+      
+      for(let i = 0;bounds[0];i++) 
+      bounds[0].parentNode.removeChild(bounds[0]);
+    
+      this.state.boxes.forEach(box=>{
+        const colorArr = ['#54ddee','#f0de10','#830ff0','#510fef','#ff0ea0','#ffaaaf']
+        let div = document.createElement('div');
+      div.setAttribute('class','bounding-box');
+      div.setAttribute('style',`
+      top: ${box[0]};
+      right: ${box[1]};
+      bottom: ${box[2]};
+      left: ${box[3]};
+      box-shadow: 0 0 0 3px ${colorArr[count]};
+      `)
+      document.querySelector('.image-container').appendChild(div)
+      ++count;
+      })
+  
+    })
+    .catch(err=>{console.log(err);})
+   
+   
+    fetch('https://agile-atoll-33348.herokuapp.com/image',{
+      method:'put',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        id : this.state.user.id
+      })
+  })
+  .then(response => response.json())
+  .then(data => {
+    this.setState(Object.assign(this.state.user,{ entries: data}));
+    this.setState({ checked : true});
+  })
+  }
+  
+ this.url = this.state.input;
+ 
   }
   
   render() {
@@ -172,18 +253,24 @@ class App extends Component {
             { 
               this.state.route === 'signin' 
            
-            ? <SignIn onRouteChange={this.onRouteChange}/>
+            ? <SignIn 
+            loadUser = { this.loadUser} 
+            onRouteChange={this.onRouteChange}/>
             
             : (
                this.state.route === 'register'
                 
-              ? <Register onRouteChange={this.onRouteChange}/>
+              ? <Register 
+              loadUser = { this.loadUser}
+              onRouteChange={this.onRouteChange}/>
                 
               : <div>
                     <Logo />
-                    <Rank />
+                    <Rank user = {this.state.user} />
+                    <div className='form-image-container'>
                     <ImageLinkForm onInputChange={this.onInputChange} onButtonSubmit={this.onButtonSubmit} />
-                    <FaceRecognition box={this.state.box} imageURL={this.state.imageURL}/> 
+                    <FaceRecognition boxes={this.state.boxes} imageURL={this.state.imageURL}/> 
+                    </div>
                 </div>
             )
             }
