@@ -31,8 +31,7 @@ class SignIn extends React.Component{
         })
         .then(response => response.json() )
         .then(data =>{ 
-            if (data === 'Password/Username Mismatch'){
-                console.log(data); 
+            if (!data.id){
               let inputs = document.querySelectorAll('.sign-in-container input');
               inputs[0].style.border = '1px solid #f33';
               inputs[1].style.border = '1px solid #f33';
@@ -40,9 +39,9 @@ class SignIn extends React.Component{
             else{
             this.props.loadUser(data) 
             onRouteChange('home'); 
-            }
-            
+            } 
         } )
+        .catch(err => console.log)
     }
     render(){
         
